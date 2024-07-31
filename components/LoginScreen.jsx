@@ -1,8 +1,30 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import React from "react";
+import React, { useCallback } from "react";
 import { Colors } from "../constants/Colors";
+import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
+import * as WebBrowser from "expo-web-browser";
+import { useOAuth } from "@clerk/clerk-expo";
 
+WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
+
+  useWarmUpBrowser();
+
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+  const onPress = useCallback(async () => {
+    try {
+      const {createSessionId, signIn, signUp, setActive} = await startOAuthFlow();
+
+      if (createSessionId) {
+        setActive({ session: createSessionId });
+      } else {
+
+      }
+    } catch (error) {
+      console.error("OAuth error", error);
+    }
+  }, []);
+
   return (
     <View>
 
@@ -41,7 +63,7 @@ export default function LoginScreen() {
             color: Colors.GRAY
           }}>Find your favorite business near your and post your own business to your community </Text>
       
-          <TouchableOpacity style={styles.btn}>
+          <TouchableOpacity style={styles.btn} onPress={onPress}>
             <Text style={{
               textAlign: "center",
               color: "#fff",
